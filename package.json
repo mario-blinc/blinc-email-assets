@@ -1,0 +1,19 @@
+{
+  "name": "blinc-email-assets",
+  "version": "1.0.0",
+  "scripts": {
+    "avatars": "node scripts/avatars.mjs",
+    "icons": "node scripts/icons.mjs",
+    "build": "node scripts/build.mjs",
+    "check": "node scripts/check-append-only.mjs --git origin/main",
+    "check:live": "node scripts/check-append-only.mjs",
+    "verify": "node scripts/verify-urls.mjs"
+  },
+  "devDependencies": {
+    "gifenc": "^1.0.3",
+    "playwright": "^1.56.1",
+    "sharp": "^0.35.5"
+  },
+  "private": true,
+  "type": "module"
+}

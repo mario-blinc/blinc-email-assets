@@ -1,0 +1,4 @@
+node_modules/
+previews/.assets/
+.vercel
+.DS_Store

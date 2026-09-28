@@ -1,0 +1,2 @@
+Temporary: lets the first Vercel deploy past the append-only check before assets.blinc.studio exists.
+Delete this file as soon as https://assets.blinc.studio/manifest.json is live.

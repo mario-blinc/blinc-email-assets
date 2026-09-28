@@ -40,8 +40,10 @@ if (gi > -1) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     baseline = (await res.json()).files;
   } catch (e) {
-    if (process.env.ALLOW_NO_MANIFEST) { console.warn(`! Could not fetch ${LIVE_MANIFEST}: ${e.message}. Skipping check.`); process.exit(0); }
-    console.error(`Could not fetch ${LIVE_MANIFEST}: ${e.message}. Set ALLOW_NO_MANIFEST=1 only if the site has never been deployed.`);
+    // First deploy only: the site doesn't exist yet, so there is nothing to compare against.
+    // Enabled by the ALLOW_NO_MANIFEST env var or a committed .allow-no-manifest file; remove both once the site is live.
+    if (process.env.ALLOW_NO_MANIFEST || fs.existsSync(path.join(ROOT, '.allow-no-manifest'))) { console.warn(`! Could not fetch ${LIVE_MANIFEST}: ${e.message}. Skipping check.`); process.exit(0); }
+    console.error(`Could not fetch ${LIVE_MANIFEST}: ${e.message}. Only if the site has never been deployed, set ALLOW_NO_MANIFEST=1 or commit a .allow-no-manifest file.`);
     process.exit(1);
   }
 }

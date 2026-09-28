@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "avatars": "node scripts/avatars.mjs",
+    "logo": "node scripts/logo.mjs",
     "icons": "node scripts/icons.mjs",
     "build": "node scripts/build.mjs",
     "check": "node scripts/check-append-only.mjs --git origin/main",

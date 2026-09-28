@@ -1,0 +1,14 @@
+{
+  "animated": "blinc-logo-animated-v1.gif",
+  "static": "blinc-logo-static-v1.png",
+  "width": 77,
+  "height": 37,
+  "wordmark": {
+    "left": 2.3,
+    "top": 6.2,
+    "right": 4.7,
+    "width": 70
+  },
+  "source": "source/logo/BLINC_v7_White_800x450.gif",
+  "loopMs": 9280
+}

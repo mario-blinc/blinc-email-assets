@@ -13,11 +13,25 @@ export const ASSET_BASE = 'https://assets.blinc.studio/email';
 // Fixed order. Only the highlight moves per person.
 export const CITIES = ['LONDON', 'DUBAI', 'LIMASSOL', 'MILAN', 'LISBON'];
 
-// Current logo. Bump these when a new logo version is added.
-const LOGO = { file: 'blinc-logo-animated-v1.gif', width: 70, height: 26 };
+// Current logo, written by scripts/logo.mjs.
+const LOGO = JSON.parse(fs.readFileSync(path.join(ROOT, 'team/logo.json'), 'utf8'));
+
+// Layout from the mockup: 28px card padding, 133px avatar, 28px gap, and the settled
+// wordmark's top-right corner 12.4px below the content top, flush with the end of the blue rule.
+const PAD = 28, AVATAR = 133, GAP = 28, WORDMARK_TOP = 12.4;
+const RULE_W = 600 - PAD * 2 - AVATAR - GAP;               // 383: text column and rule width
+// The animation reaches past the settled wordmark on the right; let the logo cell take that
+// much of the right padding so the wordmark itself lines up with the rule.
+const OVERHANG = Math.max(0, Math.min(PAD, Math.round(LOGO.wordmark.right)));
+const LAYOUT = {
+  PAD_R: PAD - OVERHANG,
+  INNER_W: RULE_W + AVATAR + GAP + OVERHANG,
+  COL_W: RULE_W + OVERHANG,
+  OVERHANG,
+  LOGO_PAD_TOP: Math.max(0, Math.round(WORDMARK_TOP - LOGO.wordmark.top)),
+};
 
 const SEPARATOR = '&nbsp;&nbsp;/&nbsp;&nbsp;';
-const CITY_STRIP_MAX_PX = 383;   // width of the text column
 const GMAIL_LIMIT = 10000;
 const TODO = 'TODO';
 
@@ -53,9 +67,10 @@ export function renderSignature(template, person) {
     PHONE: escapeHtml(person.phone),
     PHONE_INTL: escapeHtml(String(person.phoneIntl).replace(/[^+\d]/g, '')),
     CITIES: citiesHtml(person.city, who),
-    LOGO: LOGO.file,
+    LOGO: LOGO.animated,
     LOGO_W: LOGO.width,
     LOGO_H: LOGO.height,
+    ...LAYOUT,
   };
   const html = template.replace(/\{\{(\w+)\}\}/g, (m, key) => {
     if (!(key in tokens)) throw new Error(`template.html has unknown token ${m}`);
@@ -123,7 +138,7 @@ async function renderPreviews(jobs) {
       const r = document.createRange(); r.selectNodeContents(td);
       return Math.ceil(r.getBoundingClientRect().width);
     });
-    if (stripWidth > CITY_STRIP_MAX_PX) warn(`${who}: city strip is ${stripWidth}px, wider than the ${CITY_STRIP_MAX_PX}px column. It will not fit on one line at 600px.`);
+    if (stripWidth > RULE_W) warn(`${who}: city strip is ${stripWidth}px, wider than the ${RULE_W}px column. It will not fit on one line at 600px.`);
     await (await tab.$('table')).screenshot({ path: out });
     const ph = assetsUsed(html).map((u) => u.split('/').pop()).filter((f) => usedPlaceholder.has(f));
     console.log(`${path.relative(ROOT, out)}${ph.length ? `  (placeholder: ${ph.join(', ')})` : ''}`);

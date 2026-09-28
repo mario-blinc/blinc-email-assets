@@ -13,8 +13,9 @@ Never host signature images on Google Drive, Notion, Canva or Dropbox links.
 | `public/email/` | Hosted images (what Vercel serves) |
 | `public/manifest.json` | Hashes of everything in `public/email/`, used by the append-only check |
 | `team/team.json` | One entry per person |
-| `source/avatars/` | Original avatar renders, untouched |
-| `scripts/` | `avatars.mjs`, `icons.mjs`, `build.mjs`, `check-append-only.mjs`, `verify-urls.mjs` |
+| `team/logo.json` | Current logo files and where the wordmark sits in them (written by `logo.mjs`) |
+| `source/avatars/`, `source/logo/` | Original avatar renders and logo files, untouched |
+| `scripts/` | `avatars.mjs`, `logo.mjs`, `icons.mjs`, `build.mjs`, `check-append-only.mjs`, `verify-urls.mjs` |
 | `signatures/` | Generated signature per person (`{slug}.html`) |
 | `previews/` | PNG screenshot of each signature, plus one per city |
 | `template.html` | Signature layout (source of truth) |
@@ -43,6 +44,13 @@ Setup once: `npm install`.
 6. After the deploy: `npm run verify` checks every image URL returns 200 with the right type.
 
 To change someone's photo, replace their file in `source/avatars/` and run `npm run avatars`: it writes the next version and updates team.json. The old version stays online.
+
+## Update the logo
+
+1. Put the new animated GIF in `source/logo/`.
+2. `npm run logo -- source/logo/<file>.gif`. It crops to the animation's full area, scales so the settled wordmark is 70px wide, starts the loop on the settled wordmark (Outlook desktop only shows frame 1), keeps the loop length exactly, uses 16 colours and stays under 150KB. It writes the next `blinc-logo-animated-v{n}.gif` and `blinc-logo-static-v{n}.png` and updates `team/logo.json`.
+   Add `--dry-run <folder>` to try it without writing to `public/email/`.
+3. `npm run build`. The logo is positioned from `team/logo.json` so the wordmark stays flush with the blue rule.
 
 ## Install the signature
 

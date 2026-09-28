@@ -24,7 +24,11 @@ if (gi > -1) {
   const ref = process.argv[gi + 1] || 'origin/main';
   source = `git ${ref}`;
   baseline = {};
-  const git = (...a) => execFileSync('git', a, { cwd: ROOT, maxBuffer: 1 << 30 });
+  const git = (...a) => execFileSync('git', a, { cwd: ROOT, maxBuffer: 1 << 30, stdio: ['ignore', 'pipe', 'ignore'] });
+  try { git('rev-parse', '--verify', `${ref}^{commit}`); } catch {
+    console.error(`Unknown git ref "${ref}". Run "git fetch origin" first, or pass --git <ref>.`);
+    process.exit(1);
+  }
   for (const p of git('ls-tree', '-r', '--name-only', ref, '--', 'public/email/').toString().split('\n').filter(Boolean)) {
     baseline[path.basename(p)] = sha(git('show', `${ref}:${p}`));
   }

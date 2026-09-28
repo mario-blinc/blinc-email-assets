@@ -23,7 +23,7 @@ Setup once: `npm install`.
 
 ## Add a new team member
 
-1. Drop their avatar render in `source/avatars/` (any size; it gets centre-cropped).
+1. Drop their avatar render in `source/avatars/` (square, framed like the others; the script keeps the central 75%, anchored to the top. Adjust per person with `avatarCrop` in team.json).
 2. Add them to `team/team.json`:
    ```json
    {

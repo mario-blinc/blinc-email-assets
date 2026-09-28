@@ -10,16 +10,21 @@ import { ROOT, EMAIL_DIR, nextVersionName, writeNewAsset, existingIdentical, kb 
 const OUT = 266;          // exported size
 const SS = 4;             // mask supersampling factor
 const MAX_BYTES = 100 * 1024;
+// Framing measured from the signature mockup: keep the central 75% of the render,
+// centred horizontally and anchored to the top. Override per person with
+// "avatarCrop": { "zoom": 0.8, "x": 0.5, "y": 0 } in team.json (x/y: 0 = left/top, 0.5 = centre, 1 = right/bottom).
+const DEFAULT_CROP = { zoom: 0.75, x: 0.5, y: 0 };
 const SRC_DIR = path.join(ROOT, 'source/avatars');
 const TEAM_FILE = path.join(ROOT, 'team/team.json');
 
-export async function processAvatar(input) {
+export async function processAvatar(input, crop = {}) {
+  const { zoom, x, y } = { ...DEFAULT_CROP, ...crop };
   const big = OUT * SS;
   const { width, height } = await sharp(input).metadata();
-  const side = Math.min(width, height);
-  // Centre-crop to square and scale to 4x the output size.
+  const side = Math.round(Math.min(width, height) * zoom);
+  // Crop to square and scale to 4x the output size.
   const square = await sharp(input)
-    .extract({ left: Math.floor((width - side) / 2), top: Math.floor((height - side) / 2), width: side, height: side })
+    .extract({ left: Math.round((width - side) * x), top: Math.round((height - side) * y), width: side, height: side })
     .resize(big, big, { kernel: 'lanczos3' })
     .ensureAlpha()
     .toBuffer();
@@ -44,7 +49,7 @@ async function main() {
   for (const file of sources) {
     const person = team.find((p) => p.avatar === file);
     if (!person) { console.warn(`! source/avatars/${file} is not referenced by any team.json entry, skipped`); continue; }
-    const png = await processAvatar(fs.readFileSync(path.join(SRC_DIR, file)));
+    const png = await processAvatar(fs.readFileSync(path.join(SRC_DIR, file)), person.avatarCrop);
     const stem = `avatar-${person.slug}`;
     const current = person.avatarAsset && fs.existsSync(path.join(EMAIL_DIR, person.avatarAsset))
       ? fs.readFileSync(path.join(EMAIL_DIR, person.avatarAsset)) : null;
